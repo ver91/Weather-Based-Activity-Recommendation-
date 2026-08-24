@@ -162,3 +162,19 @@ def generate_weather_dataset(n_samples=10000):
     return pd.DataFrame(data)
 
 print("Generating weather dataset...")
+df = generate_weather_dataset(10000)
+
+print(f"\nDataset shape: {df.shape}")
+print("\nFirst 5 rows:")
+print(df[['temperature', 'humidity', 'wind_speed', 'weather_condition', 'recommended_activity']].head())
+
+print("\nActivity distribution:")
+print(df['recommended_activity'].value_counts())
+
+df.to_csv('weather_activity_dataset.csv', index=False)
+print("\nDataset saved as 'weather_activity_dataset.csv'")
+
+json_data = df.to_dict(orient='records')
+with open('weather_activity_dataset.json', 'w') as f:
+    json.dump(json_data, f, indent=2)
+print("Dataset saved as 'weather_activity_dataset.json'")
