@@ -1,0 +1,112 @@
+{
+  "name": "Weather Activity Recommendation System",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "weather-analysis",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "1. Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "weather-analysis-webhook"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5000/webhook/weather",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": {
+          "temperature": "={{ $json.body.temperature }}",
+          "humidity": "={{ $json.body.humidity }}",
+          "wind_speed": "={{ $json.body.windSpeed }}",
+          "weather": "={{ $json.body.weather }}",
+          "description": "={{ $json.body.description || '' }}"
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "http-request",
+      "name": "2. Call Python Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Get the response from Python service\nconst data = $input.item.json;\n\n// Check if we have a recommendation\nconst recommendation = data.recommendation || data;\nconst weatherData = data.weather || {};\n\n// Format the response for n8n\nreturn {\n  // Recommendation details\n  activity: recommendation.activity || 'No recommendation available',\n  confidence: recommendation.confidence || 0,\n  method: recommendation.method || 'Unknown',\n  reason: recommendation.input?.description || recommendation.reason || '',\n  \n  // Weather details\n  city: data.city || 'Unknown',\n  country: data.country || '',\n  temperature: recommendation.input?.temperature || weatherData.temperature || data.temperature || 'N/A',\n  humidity: recommendation.input?.humidity || weatherData.humidity || data.humidity || 'N/A',\n  windSpeed: recommendation.input?.wind_speed || weatherData.wind_speed || data.wind_speed || 'N/A',\n  weather: recommendation.input?.weather || weatherData.weather || data.weather || 'N/A',\n  weatherDescription: weatherData.description || recommendation.input?.description || '',\n  \n  // Success status\n  success: data.success !== undefined ? data.success : true,\n  timestamp: recommendation.timestamp || data.timestamp || new Date().toISOString(),\n  \n  // Original data (for debugging)\n  raw: data\n};"
+      },
+      "id": "function-process",
+      "name": "3. Format Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "responseBody": "{\n  \"success\": {{ $json.success }},\n  \"recommendation\": {\n    \"activity\": \"{{ $json.activity }}\",\n    \"confidence\": \"{{ $json.confidence }}%\",\n    \"method\": \"{{ $json.method }}\",\n    \"reason\": \"{{ $json.reason }}\"\n  },\n  \"weather\": {\n    \"city\": \"{{ $json.city }}\",\n    \"country\": \"{{ $json.country }}\",\n    \"temperature\": \"{{ $json.temperature }}°C\",\n    \"humidity\": \"{{ $json.humidity }}%\",\n    \"windSpeed\": \"{{ $json.windSpeed }} m/s\",\n    \"condition\": \"{{ $json.weather }}\",\n    \"description\": \"{{ $json.weatherDescription }}\"\n  },\n  \"timestamp\": \"{{ $json.timestamp }}\"\n}",
+        "responseHeaders": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "respond-to-webhook",
+      "name": "4. Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "1. Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "2. Call Python Service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Call Python Service": {
+      "main": [
+        [
+          {
+            "node": "3. Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Format Response": {
+      "main": [
+        [
+          {
+            "node": "4. Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "versionId": "weather-activity-workflow-v1",
+  "triggerCount": 0
+}
