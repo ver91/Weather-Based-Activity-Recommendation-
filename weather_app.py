@@ -3,13 +3,9 @@ from tkinter import ttk, messagebox
 import requests
 import json
 ewq4eaqa
-# ==========================================================
-# OPENWEATHER API KEY
-# ==========================================================
 
 API_KEY = "8f93b69527326e29e8f2ffd28bb6d0d1"
 
-# N8N Webhook URL - YOUR ACTUAL URL
 N8N_WEBHOOK_URL = "https://vermagg.app.n8n.cloud/webhook/d937d822-795b-4368-87b8-3ca303daef73"
 
 BG_COLOR = "#EAF4FF"
@@ -24,10 +20,6 @@ RED = "#DC2626"
 BLUE = "#2563EB"
 PURPLE = "#7C3AED"
 ORANGE = "#EA580C"
-
-# ==========================================================
-# LOCAL RECOMMENDATION LOGIC (FALLBACK)
-# ==========================================================
 
 def get_recommendation(temperature, humidity, wind_speed, weather):
     weather = weather.lower()
@@ -51,10 +43,6 @@ def get_recommendation(temperature, humidity, wind_speed, weather):
         return ("Walking / Photography", "Cloudy weather can be comfortable for a short outdoor activity.")
     return ("Indoor / Outdoor Activity", "Weather conditions are moderate.")
 
-# ==========================================================
-# GET WEATHER - WITH N8N INTEGRATION
-# ==========================================================
-
 def get_weather():
     city = city_entry.get().strip()
 
@@ -62,7 +50,6 @@ def get_weather():
         messagebox.showwarning("Input Required", "Please enter a city name.")
         return
 
-    # Variables for fallback
     temperature = None
     humidity = None
     wind_speed = None
@@ -72,7 +59,6 @@ def get_weather():
         status_label.config(text="⏳ Getting weather data...", fg=BLUE)
         root.update()
 
-        # 1. Get weather data from OpenWeather API
         url = "https://api.openweathermap.org/data/2.5/weather"
         parameters = {
             "q": city,
@@ -88,7 +74,6 @@ def get_weather():
             status_label.config(text="Weather information not found.", fg=RED)
             return
 
-        # Extract weather data
         city_name = data["name"]
         temperature = data["main"]["temp"]
         feels_like = data["main"]["feels_like"]
@@ -97,7 +82,6 @@ def get_weather():
         weather = data["weather"][0]["main"]
         description = data["weather"][0]["description"]
 
-        # Update UI with weather data
         city_result.config(text=f"📍 {city_name}")
         temperature_result.config(text=f"{temperature:.1f}°C")
         feels_result.config(text=f"Feels like {feels_like:.1f}°C")
@@ -106,9 +90,6 @@ def get_weather():
         humidity_result.config(text=f"{humidity}%")
         wind_result.config(text=f"{wind_speed:.1f} m/s")
 
-        # ==========================================================
-        # 2. CALL N8N WEBHOOK - THIS IS THE CRITICAL PART
-        # ==========================================================
         status_label.config(text="⏳ Getting AI recommendation from n8n...", fg=BLUE)
         root.update()
 
@@ -121,7 +102,6 @@ def get_weather():
             "description": description
         }
 
-        # Try n8n first
         n8n_success = False
         activity = None
         reason = None
@@ -138,7 +118,6 @@ def get_weather():
             if n8n_response.status_code == 200:
                 n8n_result = n8n_response.json()
                 
-                # Extract recommendation from n8n response
                 if 'recommendation' in n8n_result:
                     rec = n8n_result['recommendation']
                     activity = rec.get('activity', 'No recommendation')
@@ -149,9 +128,7 @@ def get_weather():
                     reason = n8n_result.get('reason', '')
                     method = n8n_result.get('method', 'n8n-ai')
                 else:
-                    # Fallback: try to find any string that looks like an activity
                     if isinstance(n8n_result, dict):
-                        # Check common response formats
                         for key in ['result', 'message', 'suggestion', 'recommendation']:
                             if key in n8n_result:
                                 if isinstance(n8n_result[key], str):
@@ -182,15 +159,10 @@ def get_weather():
         except Exception as e:
             print(f"⚠️ n8n error: {e}")
 
-        # ==========================================================
-        # 3. USE N8N RESULT OR FALLBACK TO LOCAL
-        # ==========================================================
         if n8n_success and activity:
-            # Use n8n recommendation
             activity_result.config(text=f"🏆 {activity}")
             reason_result.config(text=reason if reason else "Recommendation from n8n AI")
         else:
-            # Use local recommendation as fallback
             activity, reason = get_recommendation(temperature, humidity, wind_speed, weather)
             activity_result.config(text=f"🏆 {activity}")
             reason_result.config(text=reason)
@@ -218,10 +190,6 @@ def get_weather():
         messagebox.showerror("Error", f"Something went wrong: {str(error)}")
         status_label.config(text="Error occurred.", fg=RED)
 
-# ==========================================================
-# CLEAR SCREEN
-# ==========================================================
-
 def clear_screen():
     city_entry.delete(0, tk.END)
     city_result.config(text="📍 City")
@@ -235,16 +203,8 @@ def clear_screen():
     reason_result.config(text="Enter a city to get a smart activity recommendation.")
     status_label.config(text="")
 
-# ==========================================================
-# ENTER KEY
-# ==========================================================
-
 def enter_pressed(event):
     get_weather()
-
-# ==========================================================
-# MAIN WINDOW
-# ==========================================================
 
 root = tk.Tk()
 root.title("Weather-Based Activity Recommendation System")
@@ -252,17 +212,10 @@ root.state("zoomed")
 root.configure(bg=BG_COLOR)
 root.resizable(True, True)
 
-# ==========================================================
-# STYLE
-# ==========================================================
-
 style = ttk.Style()
 style.theme_use("clam")
 style.configure("Search.TEntry", padding=12, font=("Segoe UI", 14))
 
-# ==========================================================
-# HEADER
-# ==========================================================
 
 header = tk.Frame(root, bg=HEADER_COLOR, height=130)
 header.pack(fill="x")
@@ -280,10 +233,6 @@ tk.Label(title_box, text="WEATHER ACTIVITY", font=("Segoe UI", 24, "bold"), bg=H
 tk.Label(title_box, text="Smart Weather-Based Activity Recommendation", font=("Segoe UI", 11), bg=HEADER_COLOR, fg="#DCEEFF").pack(anchor="w")
 
 tk.Label(header, text="N8N INTEGRATION", font=("Segoe UI", 11, "bold"), bg=HEADER_COLOR, fg="#DCEEFF").pack(side="right", padx=45)
-
-# ==========================================================
-# SEARCH AREA
-# ==========================================================
 
 search_outer = tk.Frame(root, bg=BG_COLOR)
 search_outer.pack(pady=25)
@@ -305,16 +254,8 @@ check_button.pack(side="left", padx=5)
 clear_button = tk.Button(search_frame, text="CLEAR", font=("Segoe UI", 11, "bold"), bg="#F1F5F9", fg=TEXT_COLOR, activebackground="#E2E8F0", relief="flat", cursor="hand2", padx=15, pady=12, command=clear_screen)
 clear_button.pack(side="left", padx=(5, 10))
 
-# ==========================================================
-# CURRENT LOCATION
-# ==========================================================
-
 city_result = tk.Label(root, text="📍 City", font=("Segoe UI", 22, "bold"), bg=BG_COLOR, fg=TEXT_COLOR)
 city_result.pack(pady=(5, 15))
-
-# ==========================================================
-# MAIN WEATHER CARD
-# ==========================================================
 
 main_card = tk.Frame(root, bg=CARD_COLOR, bd=0, highlightbackground="#D5E3F0", highlightthickness=1)
 main_card.pack(padx=80, fill="x")
@@ -357,10 +298,6 @@ tk.Label(wind_frame, text="WIND SPEED", font=("Segoe UI", 10, "bold"), bg="#FFF7
 wind_result = tk.Label(wind_frame, text="-- m/s", font=("Segoe UI", 22, "bold"), bg="#FFF7ED", fg=ORANGE)
 wind_result.pack(pady=(5, 15))
 
-# ==========================================================
-# RECOMMENDATION SECTION
-# ==========================================================
-
 recommendation_outer = tk.Frame(root, bg=BG_COLOR)
 recommendation_outer.pack(padx=80, pady=25, fill="x")
 
@@ -378,24 +315,13 @@ activity_result.pack(anchor="w", pady=5)
 reason_result = tk.Label(recommendation_content, text="Enter a city to get a smart activity recommendation.", font=("Segoe UI", 11), bg="#ECFDF5", fg="#475569", wraplength=1000, justify="left")
 reason_result.pack(anchor="w")
 
-# ==========================================================
-# STATUS
-# ==========================================================
-
 status_label = tk.Label(root, text="Ready — enter a city to check live weather.", font=("Segoe UI", 10), bg=BG_COLOR, fg=SECONDARY_TEXT)
 status_label.pack(pady=(0, 15))
 
-# ==========================================================
-# FOOTER
-# ==========================================================
 
 footer = tk.Frame(root, bg="#E2ECF5")
 footer.pack(side="bottom", fill="x")
 
 tk.Label(footer, text="Weather-Based Activity Recommendation System  •  Powered by OpenWeather API & n8n", font=("Segoe UI", 9), bg="#E2ECF5", fg=SECONDARY_TEXT).pack(pady=8)
-
-# ==========================================================
-# START APPLICATION
-# ==========================================================
 
 root.mainloop()
