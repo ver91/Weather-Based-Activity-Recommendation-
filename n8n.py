@@ -1,8 +1,3 @@
-"""
-n8n Integration Module for Weather Activity Recommendation System
-FIXED: Now actually calls the n8n webhook!
-"""
-
 import pandas as pd
 import numpy as np
 import pickle
@@ -14,23 +9,12 @@ import requests
 import warnings
 warnings.filterwarnings('ignore')
 
-# ==========================================================
-# CONFIGURATION
-# ==========================================================
-
-# OpenWeather API Key
 API_KEY = "8f93b69527326e29e8f2ffd28bb6d0d1"
 
-# N8N Webhook URL - REPLACE WITH YOUR ACTUAL URL
 N8N_WEBHOOK_URL = "https://vermag.app.n8n.cloud/webhook/a59ea635-d7c4-4447-a334-95770249d05f"
 
-# Model file paths
 MODEL_PATH = "weather_activity_model.pkl"
 ENCODER_PATH = "weather_encoders.pkl"
-
-# ==========================================================
-# MODEL LOADER
-# ==========================================================
 
 class ModelLoader:
     """Load and manage the trained Logistic Regression model."""
@@ -52,7 +36,6 @@ class ModelLoader:
         model_loaded = False
         encoder_loaded = False
         
-        # Load model
         try:
             if os.path.exists(model_path):
                 with open(model_path, 'rb') as file:
@@ -73,7 +56,6 @@ class ModelLoader:
         except Exception as e:
             print(f"⚠ Error loading model: {e}. Using rule-based fallback.")
         
-        # Load encoders
         try:
             if os.path.exists(encoder_path):
                 with open(encoder_path, 'rb') as file:
@@ -231,10 +213,6 @@ class ModelLoader:
             'method': 'Rule-Based (Default)'
         }
 
-# ==========================================================
-# WEATHER SERVICE
-# ==========================================================
-
 class WeatherService:
     """Fetch and process weather data from OpenWeather API."""
     
@@ -284,18 +262,13 @@ class WeatherService:
             return {'error': f'API request failed: {str(e)}'}
         except Exception as e:
             return {'error': f'Unexpected error: {str(e)}'}
-
-# ==========================================================
-# N8N INTEGRATION WITH ACTUAL WEBHOOK CALLS
-# ==========================================================
-
 class N8NIntegration:
     """Main integration class for n8n workflows."""
     
     def __init__(self):
         self.model_loader = ModelLoader()
         self.weather_service = WeatherService()
-        self.n8n_available = False  # Track if n8n is working
+        self.n8n_available = False  
     
     def get_recommendation_from_n8n(self, weather_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
@@ -319,23 +292,18 @@ class N8NIntegration:
             data = resp.json()
             print(f"📥 n8n response: {json.dumps(data, indent=2)}")
             
-            # Try to extract recommendation from different response formats
             rec = None
             
-            # Format 1: { "recommendation": { "activity": "...", "reason": "..." } }
             if 'recommendation' in data and isinstance(data['recommendation'], dict):
                 rec = data['recommendation']
-            # Format 2: { "activity": "...", "reason": "..." }
             elif 'activity' in data and 'reason' in data:
                 rec = data
-            # Format 3: { "result": "...", "message": "..." }
             elif 'result' in data:
                 rec = {
                     'activity': data.get('result', 'No recommendation'),
                     'reason': data.get('message', ''),
                     'method': 'n8n'
                 }
-            # Format 4: Any dict with activity-like fields
             elif isinstance(data, dict):
                 for key in ['activity', 'recommendation', 'result', 'suggestion']:
                     if key in data and isinstance(data[key], (str, dict)):
@@ -346,10 +314,8 @@ class N8NIntegration:
                         break
             
             if rec and 'activity' in rec:
-                # Ensure method is set
                 if 'method' not in rec:
                     rec['method'] = 'n8n-ai'
-                # Ensure reason is set
                 if 'reason' not in rec:
                     rec['reason'] = 'Recommendation from n8n'
                 self.n8n_available = True
@@ -378,7 +344,6 @@ class N8NIntegration:
         Analyze weather and recommend an activity.
         Uses n8n first, falls back to local if n8n fails.
         """
-        # Build weather data dict for n8n call
         weather_data = {
             "temperature": temperature,
             "humidity": humidity,
@@ -387,11 +352,9 @@ class N8NIntegration:
             "description": description
         }
         
-        # Try n8n first
         n8n_result = self.get_recommendation_from_n8n(weather_data)
         
         if n8n_result:
-            # Use n8n recommendation
             result = {
                 'activity': n8n_result.get('activity', 'No recommendation'),
                 'reason': n8n_result.get('reason', ''),
@@ -402,7 +365,6 @@ class N8NIntegration:
                 'n8n_available': True
             }
         else:
-            # Fall back to local
             local_result = self.model_loader.predict(temperature, humidity, wind_speed, weather)
             result = {
                 'activity': local_result.get('activity', 'No recommendation'),
@@ -421,13 +383,11 @@ class N8NIntegration:
         Fetch weather for a city and get activity recommendation.
         This is the main function for n8n workflow integration.
         """
-        # Get weather data
         weather_data = self.weather_service.get_weather(city)
         
         if 'error' in weather_data:
             return weather_data
         
-        # Get recommendation (tries n8n first, falls back locally)
         recommendation = self.analyze_weather(
             temperature=weather_data['temperature'],
             humidity=weather_data['humidity'],
@@ -436,7 +396,6 @@ class N8NIntegration:
             description=weather_data['description']
         )
         
-        # Combine results
         return {
             'success': True,
             'city': weather_data['city'],
@@ -466,10 +425,6 @@ class N8NIntegration:
             })
         return results
 
-# ==========================================================
-# N8N WEBHOOK HANDLERS (for receiving webhooks)
-# ==========================================================
-
 def handle_webhook(event_type: str, data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Handle incoming webhook events.
@@ -497,10 +452,6 @@ def handle_webhook(event_type: str, data: Dict[str, Any]) -> Dict[str, Any]:
     
     else:
         return {'error': f'Unknown event type: {event_type}'}
-
-# ==========================================================
-# FLASK API SERVER (for receiving webhooks)
-# ==========================================================
 
 def create_flask_app():
     """Create a Flask app for receiving webhook requests."""
@@ -575,10 +526,6 @@ def create_flask_app():
         print("Flask not installed. Install with: pip install flask flask-cors")
         return None
 
-# ==========================================================
-# TEST FUNCTION
-# ==========================================================
-
 def test_n8n_connection():
     """Test the n8n webhook connection."""
     integration = N8NIntegration()
@@ -610,15 +557,10 @@ def test_n8n_connection():
     
     print("=" * 60)
 
-# ==========================================================
-# MAIN ENTRY POINT
-# ==========================================================
-
 if __name__ == "__main__":
     import sys
     
     if len(sys.argv) > 1:
-        # Command line mode
         import argparse
         
         parser = argparse.ArgumentParser(description='Weather Activity Recommendation System')
@@ -666,7 +608,6 @@ if __name__ == "__main__":
         
         integration = N8NIntegration()
         
-        # Show model status
         if integration.model_loader.use_ml:
             print(f"\n✓ Model loaded: {integration.model_loader.model_name}")
             print(f"  Accuracy: {integration.model_loader.accuracy:.2%}")
@@ -683,23 +624,4 @@ if __name__ == "__main__":
         print("  python n8n.py --city London - Get recommendation for London")
         print("  python n8n.py --analyze --temperature 25 --weather Clear")
         
-        # Ask if user wants to test n8n
         print("\nTest n8n connection now? (y/n): ", end="")
-        response = input().lower().strip()
-        if response == 'y':
-            test_n8n_connection()
-        
-        # Flask server prompt
-        print("\nStart Flask server for webhooks? (y/n): ", end="")
-        response = input().lower().strip()
-        if response == 'y':
-            app = create_flask_app()
-            if app:
-                print("\nStarting Flask server on http://localhost:5000")
-                print("Webhook endpoints:")
-                print("  POST http://localhost:5000/webhook/weather")
-                print("  POST http://localhost:5000/webhook/city")
-                print("  POST http://localhost:5000/webhook/batch")
-                print("  GET  http://localhost:5000/health")
-                print("\nPress Ctrl+C to stop")
-                app.run(host='0.0.0.0', port=5000, debug=False)
