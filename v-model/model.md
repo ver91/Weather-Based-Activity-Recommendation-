@@ -1,392 +1,484 @@
-# 🌦️ Weather Activity Recommendation System
+# Weather Activity Recommendation System — V-Model
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Model Accuracy](https://img.shields.io/badge/accuracy-90%25-brightgreen)](https://github.com)
-[![Flask](https://img.shields.io/badge/flask-2.0%2B-orange)](https://flask.palletsprojects.com/)
-[![n8n](https://img.shields.io/badge/n8n-integrated-purple)](https://n8n.io/)
+## 1. System Overview
 
-## 🎯 Overview
+The **Weather Activity Recommendation System** is an intelligent application that analyzes real-time weather conditions and recommends suitable activities.
 
-An intelligent **Weather Activity Recommendation System** that analyzes real-time weather data and provides smart activity suggestions using both **Machine Learning** and **rule-based logic**. The system integrates with **n8n workflows** for AI-powered recommendations and includes a user-friendly **desktop GUI**.
+The system combines:
 
-### 🌟 Key Features
+* Real-time weather data from the **OpenWeather API**
+* **Machine Learning** for activity prediction
+* **Rule-based logic** as a fallback mechanism
+* **Tkinter** for the desktop user interface
+* **Flask** for API communication
+* **n8n** for workflow automation
 
-- ✅ **Real-time Weather Data** - Fetches live weather from OpenWeather API
-- ✅ **AI-Powered Recommendations** - Logistic Regression model with 90% accuracy
-- ✅ **n8n Integration** - Seamless workflow automation and AI orchestration
-- ✅ **Beautiful Desktop GUI** - Modern Tkinter interface with intuitive design
-- ✅ **RESTful API** - Flask endpoints for programmatic access
-- ✅ **Intelligent Fallback** - Automatic switch between ML and rule-based logic
-- ✅ **Batch Processing** - Analyze multiple weather records at once
-- ✅ **City Search** - Get weather and recommendations for any city worldwide
+---
 
-## 🏗️ System Architecture
+## 2. V-Model Development Process
 
+The V-Model is used to organize the development and testing of the system.
+
+```text
+                    V-MODEL
+                       │
+        ┌──────────────┴──────────────┐
+        │                             │
+        ▼                             │
+  Requirements Analysis               │
+        │                             │
+        ▼                             │
+  System Design                       │
+        │                             │
+        ▼                             │
+  Architecture Design                │
+        │                             │
+        ▼                             │
+  Module Design                       │
+        │                             │
+        ▼                             │
+  Implementation                      │
+        │                             │
+        └──────────────┬──────────────┘
+                       │
+                       ▼
+                Unit Testing
+                       │
+                       ▼
+               Integration Testing
+                       │
+                       ▼
+                System Testing
+                       │
+                       ▼
+             Acceptance Testing
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    USER INTERFACE LAYER                         │
-│                    (Tkinter Desktop App)                        │
-│                          weather_app.py                         │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    API INTEGRATION LAYER                       │
-│                    (Flask Server + n8n)                        │
-│                        server.py                               │
-│                    n8n.py / workflow.json                      │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    WEATHER DATA LAYER                          │
-│                    (OpenWeather API)                           │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    MACHINE LEARNING LAYER                      │
-│                    (Logistic Regression)                       │
-│                    train_model.py                              │
-└─────────────────────────────────────────────────────────────────┘
+
+---
+
+## 3. V-Model Phases
+
+### 3.1 Requirements Analysis
+
+The system requirements are identified before implementation.
+
+### Functional Requirements
+
+* Accept city name from the user.
+* Fetch real-time weather information.
+* Display temperature, humidity, wind speed, and weather condition.
+* Predict a suitable activity.
+* Provide a recommendation to the user.
+* Support ML-based prediction.
+* Provide rule-based fallback logic.
+* Support API and n8n integration.
+
+### Non-Functional Requirements
+
+* Easy-to-use interface
+* Fast response
+* Reliable weather data
+* Maintainable code
+* Accurate activity prediction
+
+---
+
+## 4. System Design
+
+The system is divided into multiple layers.
+
+```text
+┌──────────────────────────────────────┐
+│          User Interface              │
+│            Tkinter GUI               │
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────┐
+│       Application / API Layer        │
+│             Flask API                │
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────┐
+│         Weather Data Layer           │
+│          OpenWeather API             │
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────┐
+│       Machine Learning Layer         │
+│        Logistic Regression           │
+└──────────────────┬───────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────┐
+│      Recommendation Engine           │
+│       ML + Rule-Based Logic          │
+└──────────────────────────────────────┘
 ```
 
-## 📁 Project Structure
+---
 
+## 5. Architecture Design
+
+### User Interface Layer
+
+The Tkinter desktop application allows the user to:
+
+* Enter a city
+* Request weather information
+* View current weather conditions
+* View recommended activities
+
+### API Integration Layer
+
+The Flask server provides API endpoints for processing weather information and returning recommendations.
+
+### Weather Data Layer
+
+The OpenWeather API provides real-time:
+
+* Temperature
+* Humidity
+* Wind speed
+* Weather condition
+
+### Machine Learning Layer
+
+The ML model analyzes weather features and predicts the most appropriate activity.
+
+### Recommendation Layer
+
+The recommendation engine returns the final activity using:
+
+1. ML prediction when the model is available.
+2. Rule-based logic when ML prediction is unavailable.
+
+---
+
+# 6. Module Design
+
+The project is divided into the following modules:
+
+```text
+weather_app.py
+       │
+       ▼
+    server.py
+       │
+       ├──────────────► OpenWeather API
+       │
+       ▼
+      ai.py
+       │
+       ▼
+ ML Recommendation Model
+       │
+       ▼
+ Activity Recommendation
 ```
+
+### weather_app.py
+
+Responsible for the Tkinter desktop interface.
+
+### server.py
+
+Responsible for Flask API services and request processing.
+
+### ai.py
+
+Contains the recommendation logic and ML model integration.
+
+### train_model.py
+
+Responsible for training and evaluating the machine learning model.
+
+### gen.py
+
+Generates the weather activity training dataset.
+
+### n8n.py
+
+Handles communication between the Python application and n8n workflow automation.
+
+---
+
+# 7. Machine Learning Module
+
+The system uses **Logistic Regression** for activity classification.
+
+### Input Features
+
+The model uses weather-related features such as:
+
+* Temperature
+* Humidity
+* Wind Speed
+* Weather Condition
+
+### Output
+
+The model predicts a suitable activity category.
+
+Example:
+
+```text
+Weather Data
+     ↓
+Feature Processing
+     ↓
+Label Encoding
+     ↓
+Standard Scaling
+     ↓
+Logistic Regression
+     ↓
+Activity Prediction
+```
+
+The trained model is stored using **Pickle** so that it can be loaded by the application without retraining every time.
+
+---
+
+# 8. Recommendation Logic
+
+The system follows a dual-layer approach.
+
+```text
+             Weather Input
+                   │
+                   ▼
+             ML Prediction
+                   │
+             Model Available?
+              /          \
+            Yes           No
+             │             │
+             ▼             ▼
+        ML Result     Rule-Based Logic
+             │             │
+             └──────┬──────┘
+                    ▼
+             Final Activity
+                    │
+                    ▼
+              User Interface
+```
+
+### ML Layer
+
+The trained Logistic Regression model predicts the recommended activity based on weather conditions.
+
+### Rule-Based Layer
+
+If the ML model is unavailable or cannot process the input, predefined weather rules are used.
+
+Example:
+
+```text
+Rainy Weather
+      ↓
+Indoor Activity
+
+Clear + Comfortable Temperature
+      ↓
+Outdoor Activity
+
+High Temperature
+      ↓
+Indoor / Low-Intensity Activity
+
+Strong Wind
+      ↓
+Indoor Activity
+```
+
+---
+
+# 9. Testing Phase
+
+Testing is performed after implementation according to the V-Model.
+
+## Unit Testing
+
+Individual modules are tested separately.
+
+Examples:
+
+* Weather API function
+* ML prediction function
+* Recommendation function
+* Input validation
+* Flask endpoints
+
+## Integration Testing
+
+The interaction between modules is tested.
+
+```text
+Tkinter
+   ↓
+Flask
+   ↓
+OpenWeather API
+   ↓
+ML Model
+   ↓
+Recommendation
+```
+
+## System Testing
+
+The complete application is tested as a single system.
+
+Test cases include:
+
+* Valid city input
+* Invalid city input
+* Clear weather
+* Rainy weather
+* Extreme temperature
+* High humidity
+* High wind speed
+* ML model unavailable
+
+## Acceptance Testing
+
+The final system is checked against the original requirements to ensure that it provides correct weather information and meaningful activity recommendations.
+
+---
+
+# 10. n8n Integration
+
+n8n is used for workflow automation.
+
+```text
+User / Application
+        │
+        ▼
+   n8n Webhook
+        │
+        ▼
+ Python / Flask API
+        │
+        ▼
+ Weather Analysis
+        │
+        ▼
+ ML / Rule-Based Engine
+        │
+        ▼
+ Recommendation
+        │
+        ▼
+   n8n Response
+```
+
+The n8n workflow can receive weather information, send it to the Python service, process the response, and return the recommendation.
+
+---
+
+# 11. Project Workflow
+
+```text
+START
+  │
+  ▼
+Enter City
+  │
+  ▼
+Request Weather Data
+  │
+  ▼
+OpenWeather API
+  │
+  ▼
+Receive Weather Information
+  │
+  ▼
+Preprocess Weather Data
+  │
+  ▼
+ML Model Available?
+  │
+ ┌┴───────────────┐
+ │                │
+Yes              No
+ │                │
+ ▼                ▼
+ML Prediction   Rule-Based
+ │                │
+ └───────┬────────┘
+         ▼
+Activity Recommendation
+         │
+         ▼
+Display Result
+         │
+         ▼
+        END
+```
+
+---
+
+# 12. Project Structure
+
+```text
 weather-activity-recommendation/
-├── 📄 README.md                    # Project documentation
-├── 📄 LICENSE                      # MIT License
-├── 📄 requirements.txt             # Python dependencies
-├── 📄 .gitignore                   # Git ignore file
 │
-├── 🖥️ weather_app.py               # Tkinter desktop application
-├── 🚀 server.py                    # Flask API server
-├── 🤖 n8n.py                       # n8n integration module
-├── 🧠 ai.py                        # Core recommendation engine
-├── 📊 train_model.py               # ML training script
-├── 📈 gen.py                       # Dataset generator
+├── weather_app.py
+├── server.py
+├── ai.py
+├── train_model.py
+├── gen.py
+├── n8n.py
+├── requirements.txt
 │
-├── 📁 models/
-│   ├── weather_activity_model.pkl  # Trained ML model
-│   └── weather_encoders.pkl        # Label encoders
+├── models/
+│   ├── weather_activity_model.pkl
+│   └── weather_encoders.pkl
 │
-├── 📁 data/
-│   ├── weather_activity_dataset.csv   # Sample training data
-│   └── weather_activity_dataset.json  # JSON format
+├── data/
+│   └── weather_activity_dataset.csv
 │
-└── 📁 workflows/
-    ├── weather_analysis_workflow.json # n8n workflow definition
-    └── weather_analysis_workflow.yaml # YAML format
+└── workflows/
+    └── weather_analysis_workflow.json
 ```
 
-## 🚀 Quick Start
+---
 
-### Prerequisites
+# 13. Technologies Used
 
-```bash
-Python 3.8+
-pip (Python package manager)
-OpenWeather API Key (free tier available)
-n8n (optional, for AI workflow integration)
-```
+| Component            | Technology          |
+| -------------------- | ------------------- |
+| Programming Language | Python              |
+| GUI                  | Tkinter             |
+| Machine Learning     | Scikit-learn        |
+| Data Processing      | Pandas, NumPy       |
+| ML Algorithm         | Logistic Regression |
+| Model Storage        | Pickle              |
+| Weather Data         | OpenWeather API     |
+| Backend API          | Flask               |
+| Automation           | n8n                 |
 
-### Installation
+---
 
-1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/weather-activity-recommendation.git
-cd weather-activity-recommendation
-```
+# 14. Final V-Model Mapping
 
-2. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
+| Development Phase     | Corresponding Testing Phase |
+| --------------------- | --------------------------- |
+| Requirements Analysis | Acceptance Testing          |
+| System Design         | System Testing              |
+| Architecture Design   | Integration Testing         |
+| Module Design         | Unit Testing                |
+| Implementation        | Code Verification           |
 
-3. **Set up API keys**
-```python
-# In weather_app.py and n8n.py
-API_KEY = "your_openweather_api_key"  # Get from https://openweathermap.org/api
-N8N_WEBHOOK_URL = "your_n8n_webhook_url"  # Your n8n webhook endpoint
-```
+---
 
-4. **Train the model (optional)**
-```bash
-python gen.py          # Generate synthetic dataset
-python train_model.py  # Train the ML model
-```
+## 15. Conclusion
 
-5. **Start the application**
+The Weather Activity Recommendation System follows the **V-Model software development methodology**, where every development phase is associated with a corresponding testing phase.
 
-**Option A: Desktop App**
-```bash
-python weather_app.py
-```
-
-**Option B: API Server**
-```bash
-python server.py
-```
-
-**Option C: n8n Integration**
-```bash
-python n8n.py --test
-```
-
-## 🎮 Usage Guide
-
-### Desktop Application
-
-1. Launch the app: `python weather_app.py`
-2. Enter a city name in the search bar
-3. Click "CHECK WEATHER" or press Enter
-4. View real-time weather data and smart activity recommendation
-
-### API Endpoints
-
-| Endpoint | Method | Description | Example |
-|----------|--------|-------------|---------|
-| `/` | GET | Service information | - |
-| `/health` | GET | Health check | - |
-| `/webhook/weather` | POST | Analyze weather data | [Example](#api-examples) |
-| `/webhook/city` | POST | Get city weather | [Example](#api-examples) |
-| `/webhook/batch` | POST | Batch analysis | [Example](#api-examples) |
-
-### API Examples
-
-**Analyze Weather Data**
-```bash
-curl -X POST http://localhost:5000/webhook/weather \
-  -H "Content-Type: application/json" \
-  -d '{
-    "temperature": 25,
-    "humidity": 60,
-    "wind_speed": 3,
-    "weather": "Clear"
-  }'
-```
-
-**Get City Weather**
-```bash
-curl -X POST http://localhost:5000/webhook/city \
-  -H "Content-Type: application/json" \
-  -d '{"city": "London"}'
-```
-
-**Batch Analysis**
-```bash
-curl -X POST http://localhost:5000/webhook/batch \
-  -H "Content-Type: application/json" \
-  -d '{
-    "records": [
-      {"temperature": 25, "humidity": 60, "weather": "Clear"},
-      {"temperature": 30, "humidity": 80, "weather": "Rain"}
-    ]
-  }'
-```
-
-## 🧠 How It Works
-
-### Recommendation Logic
-
-The system uses a **dual-layer** recommendation approach:
-
-1. **ML Model Layer** (Primary)
-   - Logistic Regression trained on 10,000+ synthetic weather samples
-   - 90%+ accuracy in activity prediction
-   - Considers 9 features including weather encoding
-
-2. **Rule-Based Layer** (Fallback)
-   - Hierarchical decision tree
-   - Priority-based evaluation
-   - Handles edge cases and extreme weather
-
-### Decision Flow
-
-```
-Input Weather Data
-       ↓
-Check Weather Condition
-       ↓
-┌──────┴──────┐
-│  ML Model   │ ← n8n AI Integration
-└──────┬──────┘
-       ↓
-   Available?
-       ↓
-┌──────┴──────┐
-│   Yes       │   No
-│  Use ML     │   Use Rule-Based
-└──────┬──────┘
-       ↓
-Return Recommendation
-```
-
-## 📊 Performance
-
-| Component | Metric | Value |
-|-----------|--------|-------|
-| ML Model | Accuracy | ~90% |
-| ML Model | Precision | 0.88 |
-| ML Model | Recall | 0.87 |
-| API Response | Average Time | <500ms |
-| UI Load Time | First Paint | <1s |
-| Training Data | Samples | 10,000 |
-| Activity Classes | Categories | 7 |
-
-## 📱 Screenshots
-
-### Desktop Application
-![Weather App UI](https://via.placeholder.com/800x500?text=Weather+App+UI)
-
-### API Response Example
-```json
-{
-  "success": true,
-  "recommendation": {
-    "activity": "Walking / Cycling / Outdoor Sports",
-    "confidence": "90.0%",
-    "method": "Rule-Based",
-    "reason": "The weather conditions are comfortable for outdoor activities."
-  },
-  "weather": {
-    "temperature": "25°C",
-    "humidity": "60%",
-    "windSpeed": "3 m/s",
-    "condition": "Clear"
-  },
-  "timestamp": "2026-08-24T14:30:00Z"
-}
-```
-
-## 🛠️ Technologies Used
-
-### Core Technologies
-- **Python 3.8+** - Primary programming language
-- **Scikit-learn** - Machine learning library
-- **Pandas** - Data manipulation and analysis
-- **NumPy** - Numerical computing
-- **Flask** - Web API framework
-- **Flask-CORS** - Cross-origin resource sharing
-
-### Machine Learning
-- **Logistic Regression** - Classification algorithm
-- **Label Encoding** - Categorical variable encoding
-- **StandardScaler** - Feature scaling
-- **Pickle** - Model serialization
-
-### Frontend
-- **Tkinter** - Desktop GUI framework
-- **Requests** - HTTP library
-
-### Integration
-- **n8n** - Workflow automation
-- **OpenWeather API** - Weather data source
-
-## 🔄 n8n Integration
-
-The system seamlessly integrates with n8n for AI-powered workflow automation:
-
-1. **Webhook Trigger** - Receives weather data
-2. **HTTP Request** - Calls the Python service
-3. **Function Node** - Formats the response
-4. **Respond to Webhook** - Sends back recommendation
-
-### n8n Workflow
-
-```yaml
-name: Weather Activity Analysis
-nodes:
-  - Webhook Trigger (weather-analysis)
-  - Call Python Service (http://localhost:5000/webhook/weather)
-  - Format Response (Function)
-  - Respond to Webhook
-```
-
-## 🧪 Testing
-
-### Test n8n Connection
-```bash
-python n8n.py --test
-```
-
-### Test API Endpoints
-```bash
-# Health Check
-curl http://localhost:5000/health
-
-# Weather Analysis
-curl -X POST http://localhost:5000/webhook/weather \
-  -H "Content-Type: application/json" \
-  -d '{"temperature": 25, "humidity": 60, "weather": "Clear"}'
-```
-
-### Run Unit Tests
-```bash
-python -m pytest tests/
-```
-
-## 📈 Dataset Generation
-
-Generate synthetic weather data for training:
-
-```bash
-python gen.py
-```
-
-**Output:**
-- `weather_activity_dataset.csv` (10,000 records)
-- `weather_activity_dataset.json` (structured format)
-
-### Dataset Features
-
-| Feature | Range | Description |
-|---------|-------|-------------|
-| Temperature | -10°C to 40°C | Current temperature |
-| Humidity | 0% to 100% | Relative humidity |
-| Wind Speed | 0 to 15 m/s | Wind speed |
-| Weather Condition | 8 types | Clear, Clouds, Rain, etc. |
-| Activity | 7 classes | Recommended activity |
-
-## 🤝 Contributing
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Commit your changes**
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
-
-### Development Guidelines
-
-- Follow PEP 8 style guide
-- Write docstrings for all functions
-- Add type hints where possible
-- Include unit tests for new features
-- Update documentation accordingly
-
-## 📝 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **OpenWeather API** - For providing real-time weather data
-- **n8n** - For workflow automation capabilities
-- **Scikit-learn** - For machine learning tools
-- **All contributors** - For their valuable contributions
-
-## 📞 Support
-
-### Contact
-- **Email**: nikhilverma6751@gmail.com
+The completed system integrates **real-time weather data, machine learning, rule-based recommendation logic, Tkinter, Flask, and n8n** to provide intelligent activity recommendations based on current weather conditions.
