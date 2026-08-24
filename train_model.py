@@ -13,19 +13,10 @@ print("==========================================")
 print(" WEATHER ACTIVITY RECOMMENDATION TRAINING")
 print("==========================================")
 
-# ==========================================================
-# LOAD DATASET - WITH AUTOMATIC COLUMN DETECTION
-# ==========================================================
-
 df = pd.read_csv("weather_activity_dataset.csv")
 print(f"\nDataset loaded successfully!")
 print("Total weather records:", len(df))
 
-# ==========================================================
-# DETECT COLUMN NAMES AUTOMATICALLY
-# ==========================================================
-
-# Find the activity column (handle different naming conventions)
 activity_col = None
 for col in df.columns:
     if 'activity' in col.lower():
@@ -33,11 +24,9 @@ for col in df.columns:
         break
 
 if activity_col is None:
-    # If no activity column found, use the last column
     activity_col = df.columns[-1]
     print(f"Warning: No 'activity' column found. Using '{activity_col}' as target.")
 
-# Find weather condition column
 weather_col = None
 for col in df.columns:
     if 'weather' in col.lower() or 'condition' in col.lower():
@@ -45,7 +34,6 @@ for col in df.columns:
         break
 
 if weather_col is None:
-    # If no weather column found, use the 4th column (assuming standard format)
     weather_col = df.columns[3]
     print(f"Warning: No 'weather' column found. Using '{weather_col}' as weather condition.")
 
@@ -64,26 +52,19 @@ print(df.info())
 print(f"\nActivity Distribution:")
 print(df[activity_col].value_counts())
 
-# ==========================================================
-# FEATURE ENGINEERING
-# ==========================================================
-
 print("\n==========================================")
 print("PREPARING FEATURES")
 print("==========================================")
 
-# Encode weather condition
 weather_encoder = LabelEncoder()
 df['Weather_Encoded'] = weather_encoder.fit_transform(df[weather_col])
 
-# Create binary weather features
 df['is_rain'] = df[weather_col].apply(lambda x: 1 if x in ['Rain', 'Thunderstorm', 'Drizzle'] else 0)
 df['is_snow'] = df[weather_col].apply(lambda x: 1 if x == 'Snow' else 0)
 df['is_clear'] = df[weather_col].apply(lambda x: 1 if x == 'Clear' else 0)
 df['is_cloudy'] = df[weather_col].apply(lambda x: 1 if x in ['Clouds'] else 0)
 df['is_foggy'] = df[weather_col].apply(lambda x: 1 if x in ['Mist', 'Fog'] else 0)
 
-# Encode target variable
 activity_encoder = LabelEncoder()
 df['Activity_Encoded'] = activity_encoder.fit_transform(df[activity_col])
 
@@ -91,11 +72,6 @@ print("\nWeather Conditions:", list(weather_encoder.classes_))
 print("Activities:", list(activity_encoder.classes_))
 print("Number of activity classes:", len(activity_encoder.classes_))
 
-# ==========================================================
-# FEATURE SELECTION
-# ==========================================================
-
-# Find numeric columns
 numeric_cols = []
 for col in df.columns:
     if df[col].dtype in ['float64', 'int64'] and col not in ['Activity_Encoded', 'Weather_Encoded']:
@@ -103,8 +79,6 @@ for col in df.columns:
             # Only include temperature, humidity, wind_speed-like columns
             if 'temp' in col.lower() or 'humid' in col.lower() or 'wind' in col.lower():
                 numeric_cols.append(col)
-
-# If no numeric columns found, use the first three columns
 if not numeric_cols:
     numeric_cols = df.columns[:3].tolist()
 
@@ -128,10 +102,6 @@ for col in X.columns:
 
 print(f"\nTarget: {activity_col}")
 
-# ==========================================================
-# TRAIN-TEST SPLIT
-# ==========================================================
-
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -146,38 +116,29 @@ print("==========================================")
 print("Training samples:", len(X_train))
 print("Testing samples :", len(X_test))
 
-# ==========================================================
-# TRAIN LOGISTIC REGRESSION MODEL (FIXED)
-# ==========================================================
-
 print("\n==========================================")
 print("TRAINING LOGISTIC REGRESSION")
 print("==========================================")
 
-# Create the Logistic Regression model with fixed parameters
 lr_model = Pipeline([
-    ("scaler", StandardScaler()),  # Logistic Regression requires feature scaling
+    ("scaler", StandardScaler()), 
     ("logistic_regression", LogisticRegression(
-        max_iter=2000,               # Increased iterations for convergence
-        solver='lbfgs',              # Good for small to medium datasets
-        C=1.0,                       # Regularization strength (default)
+        max_iter=2000,              
+        solver='lbfgs',             
+        C=1.0,                      
         random_state=42,
-        class_weight='balanced'      # Handle any class imbalance
+        class_weight='balanced'     
     ))
 ])
 
 lr_model.fit(X_train, y_train)
 print("\nLogistic Regression training completed!")
 
-# ==========================================================
-# MODEL EVALUATION
-# ==========================================================
 
 print("\n==========================================")
 print("MODEL PERFORMANCE")
 print("==========================================")
 
-# Predict on test set
 y_pred = lr_model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 
@@ -186,10 +147,6 @@ print(f"  Accuracy: {round(accuracy * 100, 2)}%")
 print(f"  Classification Report:")
 report = classification_report(y_test, y_pred, target_names=activity_encoder.classes_, zero_division=0)
 print(report)
-
-# ==========================================================
-# SAVE MODEL
-# ==========================================================
 
 model_package = {
     "model": lr_model,
@@ -213,10 +170,6 @@ print(f"Algorithm: Logistic Regression")
 print(f"Accuracy: {round(accuracy * 100, 2)}%")
 print("File created: weather_activity_model.pkl")
 
-# ==========================================================
-# SAVE ENCODERS
-# ==========================================================
-
 encoder_package = {
     'weather_encoder': weather_encoder,
     'activity_encoder': activity_encoder,
@@ -229,9 +182,6 @@ with open("weather_encoders.pkl", "wb") as file:
 
 print("\nEncoders saved: weather_encoders.pkl")
 
-# ==========================================================
-# SAMPLE PREDICTIONS
-# ==========================================================
 
 print("\n==========================================")
 print("SAMPLE PREDICTIONS")
@@ -247,7 +197,6 @@ sample_data = [
 
 for i, sample in enumerate(sample_data, 1):
     try:
-        # Prepare features
         weather_encoded = weather_encoder.transform([sample['Weather']])[0]
         
         features = np.array([[
@@ -265,7 +214,6 @@ for i, sample in enumerate(sample_data, 1):
         prediction = lr_model.predict(features)
         activity = activity_encoder.inverse_transform(prediction)[0]
         
-        # Get prediction probability
         probabilities = lr_model.predict_proba(features)[0]
         max_prob = max(probabilities) * 100
         
@@ -281,25 +229,12 @@ for i, sample in enumerate(sample_data, 1):
         print(f"\nSample {i}: Error in prediction - {e}")
 
 print("\n==========================================")
-print("TRAINING COMPLETED SUCCESSFULLY!")
-print("==========================================")
-
-# ==========================================================
-# OPTIONAL: FEATURE IMPORTANCE (Coefficients)
-# ==========================================================
-
-print("\n==========================================")
 print("FEATURE COEFFICIENTS (Logistic Regression)")
 print("==========================================")
 
 try:
-    # Get the logistic regression model from pipeline
     lr = lr_model.named_steps['logistic_regression']
     
-    # Get feature names
-    feature_names = X.columns
-    
-    # For multi-class, we have coefficients for each class
     coef_df = pd.DataFrame(
         lr.coef_,
         columns=feature_names,
@@ -312,9 +247,6 @@ try:
         print(f"\n{activity}:")
         for feature, coef in top_features.items():
             print(f"  {feature}: {coef:.3f}")
-            
-except Exception as e:
-    print(f"Could not display feature coefficients: {e}")
 
 print("\n==========================================")
 print("EXECUTION COMPLETE!")
