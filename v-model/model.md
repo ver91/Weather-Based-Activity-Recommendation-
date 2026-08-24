@@ -389,5 +389,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 📞 Support
 
 ### Contact
-- **GitHub Issues**: [Create an issue](https://github.com/yourusername/weather-activity-recommendation/issues)
-- **Email**: your.email@example.com
+- **Email**: nikhilverma6751@gmail.com.com
