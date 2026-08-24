@@ -625,3 +625,19 @@ if __name__ == "__main__":
         print("  python n8n.py --analyze --temperature 25 --weather Clear")
         
         print("\nTest n8n connection now? (y/n): ", end="")
+        response = input().lower().strip()
+        if response == 'y':
+            test_n8n_connection()
+                print("\nStart Flask server for webhooks? (y/n): ", end="")
+        response = input().lower().strip()
+        if response == 'y':
+            app = create_flask_app()
+            if app:
+                print("\nStarting Flask server on http://localhost:5000")
+                print("Webhook endpoints:")
+                print("  POST http://localhost:5000/webhook/weather")
+                print("  POST http://localhost:5000/webhook/city")
+                print("  POST http://localhost:5000/webhook/batch")
+                print("  GET  http://localhost:5000/health")
+                print("\nPress Ctrl+C to stop")
+                app.run(host='0.0.0.0', port=5000, debug=False)
