@@ -7,8 +7,6 @@ def analyze_weather(
 ):
 
     weather = weather.lower()
-
-    # Rain
     if "rain" in weather or "thunderstorm" in weather:
 
         return {
@@ -16,8 +14,6 @@ def analyze_weather(
             "reason": "Rainy weather is not suitable for most outdoor activities.",
             "category": "Indoor"
         }
-
-    # Snow
     if "snow" in weather:
 
         return {
@@ -26,7 +22,6 @@ def analyze_weather(
             "category": "Indoor"
         }
 
-    # Very hot
     if temperature >= 35:
 
         return {
@@ -35,7 +30,6 @@ def analyze_weather(
             "category": "Indoor"
         }
 
-    # Strong wind
     if wind_speed >= 8:
 
         return {
@@ -44,7 +38,6 @@ def analyze_weather(
             "category": "Indoor"
         }
 
-    # Cold weather
     if temperature < 18:
 
         return {
@@ -53,7 +46,6 @@ def analyze_weather(
             "category": "Mixed"
         }
 
-    # Comfortable weather
     if 18 <= temperature <= 32:
 
         if humidity <= 75:
@@ -72,7 +64,6 @@ def analyze_weather(
                 "category": "Outdoor"
             }
 
-    # Cloudy weather
     if "cloud" in weather:
 
         return {
@@ -81,17 +72,11 @@ def analyze_weather(
             "category": "Outdoor"
         }
 
-    # Default
     return {
         "activity": "Indoor / Outdoor Activity",
         "reason": "Weather conditions are moderate.",
         "category": "Mixed"
     }
-
-
-# ==========================================================
-# TEST
-# ==========================================================
 
 if __name__ == "__main__":
 
