@@ -260,7 +260,6 @@ city_result.pack(pady=(5, 15))
 main_card = tk.Frame(root, bg=CARD_COLOR, bd=0, highlightbackground="#D5E3F0", highlightthickness=1)
 main_card.pack(padx=80, fill="x")
 
-# Temperature
 temperature_frame = tk.Frame(main_card, bg=CARD_COLOR)
 temperature_frame.pack(side="left", expand=True, fill="both", padx=20, pady=25)
 
@@ -270,7 +269,6 @@ temperature_result.pack(pady=5)
 feels_result = tk.Label(temperature_frame, text="Feels like --°C", font=("Segoe UI", 11), bg=CARD_COLOR, fg=SECONDARY_TEXT)
 feels_result.pack()
 
-# Condition
 condition_frame = tk.Frame(main_card, bg=CARD_COLOR)
 condition_frame.pack(side="left", expand=True, fill="both", padx=20, pady=25)
 
@@ -280,7 +278,6 @@ weather_result.pack(pady=8)
 description_result = tk.Label(condition_frame, text="Weather description", font=("Segoe UI", 11), bg=CARD_COLOR, fg=SECONDARY_TEXT)
 description_result.pack()
 
-# Humidity
 humidity_frame = tk.Frame(main_card, bg="#F0FDF4")
 humidity_frame.pack(side="left", expand=True, fill="both", padx=10, pady=20)
 
@@ -289,7 +286,6 @@ tk.Label(humidity_frame, text="HUMIDITY", font=("Segoe UI", 10, "bold"), bg="#F0
 humidity_result = tk.Label(humidity_frame, text="--%", font=("Segoe UI", 22, "bold"), bg="#F0FDF4", fg=GREEN)
 humidity_result.pack(pady=(5, 15))
 
-# Wind
 wind_frame = tk.Frame(main_card, bg="#FFF7ED")
 wind_frame.pack(side="left", expand=True, fill="both", padx=10, pady=20)
 
